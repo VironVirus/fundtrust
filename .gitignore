@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+
+# next build output
+.next/
+out/
+
+# local environment secrets
+.env.local
+.env*.local
+
+# logs and temporary diagnostics
+logs/
+*.log
+*.txt
+whatsapp-test*.json
+*Daily Report*.csv
+*TRANSACTION SHEET*.xlsx
+
+# local tooling state
+.sixth/
+tsconfig.tsbuildinfo
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
