@@ -46,8 +46,7 @@ export default async function TransactionPrintPage({
               Filtered transaction ledger
             </h1>
             <p className="mt-2 text-sm leading-7 text-muted-foreground">
-              Matching transactions: {summary.count.toLocaleString("en-NG")} •
-              Total value: {formatCurrency(summary.totalAmount)}
+              {summary.count.toLocaleString("en-NG")} records • {formatCurrency(summary.totalAmount)}
             </p>
           </div>
           <div className="flex flex-wrap gap-3 print:hidden">

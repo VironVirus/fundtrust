@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -15,7 +14,8 @@ import { Select } from "@/components/ui/select";
 import { initialFormState } from "@/lib/action-state";
 import { customerBranchOptions } from "@/lib/customer-options";
 
-export function AgentRegisterForm() {
+export function AdminCreateAgentForm() {
+  const formRef = useRef<HTMLFormElement>(null);
   const router = useRouter();
   const [state, formAction] = useActionState(
     registerAgentAction,
@@ -25,7 +25,8 @@ export function AgentRegisterForm() {
   useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message);
-      router.push("/login");
+      formRef.current?.reset();
+      router.refresh();
     }
 
     if (state.status === "error" && state.message) {
@@ -34,7 +35,7 @@ export function AgentRegisterForm() {
   }, [router, state.message, state.status]);
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form ref={formRef} action={formAction} className="space-y-5">
       <div className="space-y-2">
         <Label htmlFor="name">Full name</Label>
         <Input
@@ -82,17 +83,16 @@ export function AgentRegisterForm() {
           </Select>
           <FieldError message={state.errors?.gender?.[0]} />
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="address">Address</Label>
-        <Input
-          id="address"
-          name="address"
-          placeholder="15 Market Road, Enugu"
-          defaultValue={state.fields?.address ?? ""}
-        />
-        <FieldError message={state.errors?.address?.[0]} />
+        <div className="space-y-2">
+          <Label htmlFor="address">Address</Label>
+          <Input
+            id="address"
+            name="address"
+            placeholder="15 Market Road, Enugu"
+            defaultValue={state.fields?.address ?? ""}
+          />
+          <FieldError message={state.errors?.address?.[0]} />
+        </div>
       </div>
 
       <div className="grid gap-5 sm:grid-cols-2">
@@ -120,16 +120,9 @@ export function AgentRegisterForm() {
 
       <FormMessage state={state} />
 
-      <SubmitButton pendingLabel="Creating account..." className="w-full">
+      <SubmitButton pendingLabel="Creating marketer..." className="w-full">
         Create marketer
       </SubmitButton>
-
-      <p className="text-sm text-muted-foreground">
-        Already registered?{" "}
-        <Link href="/login" className="font-semibold text-primary">
-          Sign in here
-        </Link>
-      </p>
     </form>
   );
 }

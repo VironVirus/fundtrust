@@ -15,6 +15,19 @@ export type SessionUser = {
   branch?: CustomerBranch | "";
 };
 
+export type Admin = {
+  id: string;
+  name: string;
+  login: string;
+  email: string;
+  status: string;
+  createdAt: string;
+};
+
+export type AdminAccount = Admin & {
+  passwordHash: string;
+};
+
 export type Customer = {
   id: string;
   name: string;
@@ -31,6 +44,11 @@ export type Customer = {
   balanceToComplete: number;
   totalAmount: number;
   dateJoined: string;
+};
+
+export type CustomerAccount = Customer & {
+  passwordHash: string;
+  status: string;
 };
 
 export type Agent = {
@@ -69,4 +87,5 @@ export type FormActionState = {
   message?: string;
   errors?: Record<string, string[]>;
   fields?: Record<string, string>;
+  redirectTo?: string;
 };

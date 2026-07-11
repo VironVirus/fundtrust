@@ -9,14 +9,12 @@ import {
   validationErrorState,
 } from "@/lib/action-state";
 import { requireAgentSession } from "@/lib/auth";
-import { logWhatsAppDiagnostic } from "@/lib/whatsapp-diagnostics";
 import { sendDepositConfirmationEmail } from "@/lib/email";
 import { formatCurrency } from "@/lib/format";
-import { isAppsScriptConfigured, recordDeposit } from "@/lib/sheets";
+import { isSupabaseConfigured, recordDeposit } from "@/lib/sheets";
 import type { FormActionState } from "@/lib/types";
 import { formatTransactionType } from "@/lib/transaction-options";
 import { depositSchema } from "@/lib/validators";
-import { sendDepositWhatsApp } from "@/lib/whatsapp";
 
 const depositFields = ["customerId", "amount", "paymentMethod"];
 
@@ -32,9 +30,9 @@ export async function recordDepositAction(
     return validationErrorState(parsed.error, fields);
   }
 
-  if (!isAppsScriptConfigured()) {
+  if (!isSupabaseConfigured()) {
     return errorState(
-      "Apps Script backend is not configured yet. Add APPS_SCRIPT_WEB_APP_URL to .env.local.",
+      "Supabase is not configured yet. Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to your environment.",
       fields,
     );
   }
@@ -70,33 +68,12 @@ export async function recordDepositAction(
         date: new Date().toISOString(),
       };
 
-      setTimeout(() => {
-        void sendDepositConfirmationEmail(emailPayload).catch((error) => {
-          console.error("Fundtrust deposit email failed", error);
-        });
-      }, 0);
-    }
-
-    if (updatedCustomer.phone) {
-      const whatsappPayload = {
-        customerName: updatedCustomer.name,
-        phone: updatedCustomer.phone,
-        marketerName: session.name,
-        amount: parsed.data.amount,
-        paymentMethod: parsed.data.paymentMethod,
-        date: new Date().toISOString(),
-      };
-
       try {
-        await sendDepositWhatsApp(whatsappPayload);
+        await sendDepositConfirmationEmail(emailPayload);
+        message += " Email receipt queued.";
       } catch (error) {
-        console.error("Fundtrust deposit WhatsApp failed", error);
-        await logWhatsAppDiagnostic("deposit", whatsappPayload, error);
-        message += " WhatsApp alert could not be sent right now.";
-
-        if (process.env.NODE_ENV !== "production" && error instanceof Error) {
-          message += ` Detail: ${error.message}`;
-        }
+        console.error("Fundtrust deposit email failed", error);
+        message += " Email receipt could not be queued.";
       }
     }
 

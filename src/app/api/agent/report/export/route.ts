@@ -15,7 +15,7 @@ export async function GET(request: Request) {
   const session = await getSession();
 
   if (!session || session.role !== "agent") {
-    return NextResponse.redirect(new URL("/agent/login", request.url));
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   const { searchParams } = new URL(request.url);

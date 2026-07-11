@@ -82,15 +82,7 @@ export async function requireSession(role: SessionRole) {
   const session = await getSession();
 
   if (!session || session.role !== role) {
-    if (role === "admin") {
-      redirect("/admin/login");
-    }
-
-    if (role === "agent") {
-      redirect("/agent/login");
-    }
-
-    redirect("/customer/login");
+    redirect("/login");
   }
 
   return session;

@@ -46,13 +46,13 @@ export function CustomerRegisterForm() {
   useEffect(() => {
     if (state.status === "success") {
       toast.success(state.message);
-      router.push("/customer/login");
+      router.push(state.redirectTo || "/login");
     }
 
     if (state.status === "error" && state.message) {
       toast.error(state.message);
     }
-  }, [router, state.message, state.status]);
+  }, [router, state.message, state.redirectTo, state.status]);
 
   return (
     <form action={formAction} className="space-y-5">
@@ -185,38 +185,47 @@ export function CustomerRegisterForm() {
 
       <div className="rounded-[1.5rem] border border-sky-200 bg-sky-50/80 p-4 text-sm">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-800">
-          Customer ID format
+          Customer ID preview
         </p>
         <p className="mt-2 font-semibold text-sky-950">
           {customerIdPreview || "Select a branch and plan type to preview the ID"}
         </p>
-        <p className="mt-2 text-sky-900/80">
-          The first 2 digits are your branch, the next 2 digits are your plan
-          type, and the last 4 digits are your branch serial number.
-        </p>
+        <p className="mt-2 text-sky-900/80">Preview updates after branch and plan type are selected.</p>
       </div>
 
-      <div className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50/80 p-4 text-sm">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-800">
-          Flexible contributions
-        </p>
-        <p className="mt-2 leading-7 text-emerald-950">
-          Customers no longer need to set a savings target before joining.
-          Marketers can keep recording deposits for this customer whenever they
-          contribute.
-        </p>
+      <div className="grid gap-5 sm:grid-cols-2">
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="••••••••"
+          />
+          <FieldError message={state.errors?.password?.[0]} />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="confirmPassword">Confirm password</Label>
+          <Input
+            id="confirmPassword"
+            name="confirmPassword"
+            type="password"
+            placeholder="••••••••"
+          />
+          <FieldError message={state.errors?.confirmPassword?.[0]} />
+        </div>
       </div>
 
       <FormMessage state={state} />
 
       <SubmitButton pendingLabel="Submitting details..." className="w-full">
-        Submit customer details
+        Create profile
       </SubmitButton>
 
       <p className="text-sm text-muted-foreground">
-        Already have a profile?{" "}
-        <Link href="/customer/login" className="font-semibold text-primary">
-          Sign in here
+        Already have an account?{" "}
+        <Link href="/login" className="font-semibold text-primary">
+          Login here
         </Link>
       </p>
     </form>

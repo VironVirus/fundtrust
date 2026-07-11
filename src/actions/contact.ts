@@ -28,8 +28,8 @@ export async function submitContactFormAction(
 
     return successState(
       delivery.delivered
-        ? "Your message has been sent. A Fundtrust team member will follow up soon."
-        : "Your message has been captured in local preview mode.",
+        ? "Your message has been received. A Fundtrust team member will follow up soon."
+        : "Your message has been captured in preview mode.",
     );
   } catch (error) {
     const message =

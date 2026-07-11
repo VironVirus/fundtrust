@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 const navigation = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
-  { href: "/how-it-works", label: "How it Works" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -17,14 +16,9 @@ export function MarketingHeader() {
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-secondary text-sm font-bold text-white shadow-lg shadow-primary/20">
             FT
           </div>
-          <div>
-            <p className="text-lg font-semibold tracking-tight text-foreground">
-              Fundtrust
-            </p>
-            <p className="text-xs uppercase tracking-[0.22em] text-muted-foreground">
-              Savings Platform
-            </p>
-          </div>
+          <p className="text-lg font-semibold tracking-tight text-foreground">
+            Fundtrust
+          </p>
         </Link>
 
         <nav className="flex flex-wrap items-center gap-1 rounded-full border border-border/70 bg-slate-50/90 p-1 shadow-sm shadow-slate-950/4">
@@ -41,13 +35,10 @@ export function MarketingHeader() {
 
         <div className="flex flex-wrap items-center gap-3">
           <Button asChild variant="outline" size="sm">
-            <Link href="/customer/login">Customer Login</Link>
-          </Button>
-          <Button asChild variant="outline" size="sm">
-            <Link href="/agent/login">Marketer Login</Link>
+            <Link href="/register">Create account</Link>
           </Button>
           <Button asChild size="sm">
-            <Link href="/admin/login">Admin Portal</Link>
+            <Link href="/login">Login</Link>
           </Button>
         </div>
       </div>

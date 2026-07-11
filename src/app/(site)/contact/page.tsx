@@ -12,17 +12,16 @@ export default function ContactPage() {
             Contact
           </p>
           <h1 className="mt-4 font-display text-5xl text-foreground">
-            Speak with the Fundtrust team.
+            Send us a message.
           </h1>
-          <p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
-            Reach out for onboarding support, deployment questions, or help
-            configuring your Google Sheets and email provider.
+          <p className="mt-5 max-w-xl text-lg leading-8 text-muted-foreground">
+            Reach out for setup, support, or deployment help.
           </p>
 
           <div className="mt-8 grid gap-4">
             {[
               {
-                title: "Email support",
+                title: "Email",
                 value: "admin@fundtrust.app",
                 icon: Mail,
               },
@@ -32,7 +31,7 @@ export default function ContactPage() {
                 icon: PhoneCall,
               },
               {
-                title: "Operations base",
+                title: "Location",
                 value: "Enugu, Nigeria",
                 icon: MapPin,
               },
@@ -58,10 +57,7 @@ export default function ContactPage() {
 
         <Card className="border-white/70 bg-white/92">
           <CardHeader>
-            <CardTitle>Send a message</CardTitle>
-            <p className="text-sm leading-7 text-muted-foreground">
-              We’ll route your request to the right team and follow up by email.
-            </p>
+            <CardTitle>Contact form</CardTitle>
           </CardHeader>
           <CardContent>
             <ContactForm />

@@ -17,5 +17,5 @@ export default async function CustomerIndexPage() {
     redirect("/agent/dashboard");
   }
 
-  redirect("/customer/login");
+  redirect("/login");
 }

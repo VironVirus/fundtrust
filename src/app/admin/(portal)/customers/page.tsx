@@ -81,17 +81,14 @@ export default async function CustomersPage({
           Customer ledger
         </p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground">
-          Search, review, and edit customer balances
+          Customers
         </h1>
-        <p className="mt-2 text-sm leading-7 text-muted-foreground">
-          Use filters to find a customer, then open the detail panel to update
-          their balance or profile information.
-        </p>
+        <p className="mt-2 text-sm leading-7 text-muted-foreground">View and edit customer records.</p>
       </section>
 
       <Card>
         <CardHeader>
-          <CardTitle>Filter customers</CardTitle>
+          <CardTitle>Filters</CardTitle>
         </CardHeader>
         <CardContent>
           <form className="grid gap-4 xl:grid-cols-[1fr_160px_180px_200px_200px_auto_auto] xl:items-end">
@@ -166,8 +163,7 @@ export default async function CustomersPage({
               <div>
                 <CardTitle>Customers</CardTitle>
                 <CardDescription>
-                  {filteredCustomers.length.toLocaleString("en-NG")} customer
-                  records match the current filter.
+                  {filteredCustomers.length.toLocaleString("en-NG")} records
                 </CardDescription>
               </div>
               <Button asChild variant="outline">
@@ -236,7 +232,7 @@ export default async function CustomersPage({
             ) : (
               <EmptyState
                 title="No customers found"
-                description="Try a different search term or clear the active filters."
+                description="Try a different search."
                 icon={Users}
               />
             )}
@@ -249,9 +245,7 @@ export default async function CustomersPage({
               <Card>
                 <CardHeader>
                   <CardTitle>{selectedCustomer.name}</CardTitle>
-                  <CardDescription>
-                    Detailed profile and contribution summary
-                  </CardDescription>
+                  <CardDescription>Customer details</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4 text-sm">
                   <div className="flex flex-wrap items-center gap-3">
@@ -315,10 +309,6 @@ export default async function CustomersPage({
                       <p className="mt-2 text-foreground">
                         Total saved: {formatCurrency(selectedCustomer.totalAmount)}
                       </p>
-                      <p className="text-muted-foreground">
-                        Customers can continue contributing without a fixed
-                        target or balance cap.
-                      </p>
                     </div>
                   </div>
                 </CardContent>
@@ -327,9 +317,7 @@ export default async function CustomersPage({
               <Card>
                 <CardHeader>
                   <CardTitle>Edit customer</CardTitle>
-                  <CardDescription>
-                    Update balances, totals, or customer profile fields.
-                  </CardDescription>
+                  <CardDescription>Update profile and balance.</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <CustomerEditForm
@@ -342,7 +330,7 @@ export default async function CustomersPage({
           ) : (
             <EmptyState
               title="Select a customer"
-              description="Choose a customer from the table to review their full profile and edit details."
+              description="Choose a customer from the table."
               icon={Users}
             />
           )}

@@ -48,17 +48,14 @@ export default async function TransactionsPage({
           Transactions
         </p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground">
-          Filter, export, and print transaction activity
+          Transaction ledger
         </h1>
-        <p className="mt-2 text-sm leading-7 text-muted-foreground">
-          Narrow down the ledger by date range, marketer, customer, or search
-          term.
-        </p>
+        <p className="mt-2 text-sm leading-7 text-muted-foreground">Filter, export, or print transactions.</p>
       </section>
 
       <Card>
         <CardHeader>
-          <CardTitle>Filter transactions</CardTitle>
+          <CardTitle>Filters</CardTitle>
         </CardHeader>
         <CardContent>
           <form className="grid gap-4 xl:grid-cols-[1fr_170px_170px_220px_220px_auto_auto] xl:items-end">
@@ -150,9 +147,7 @@ export default async function TransactionsPage({
               <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 Outputs
               </p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Export filtered results or open the print view.
-              </p>
+              <p className="mt-2 text-sm text-muted-foreground">Export or print.</p>
             </div>
             <div className="flex flex-wrap gap-3">
               <Button asChild variant="outline">
@@ -214,7 +209,7 @@ export default async function TransactionsPage({
           ) : (
             <EmptyState
               title="No transactions found"
-              description="Try adjusting the active filters to see more results."
+              description="Try different filters."
               icon={ReceiptText}
             />
           )}

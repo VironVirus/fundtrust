@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 type StatCardProps = {
   title: string;
   value: string;
-  hint: string;
+  hint?: string;
   icon: LucideIcon;
 };
 
@@ -21,7 +21,9 @@ export function StatCard({ title, value, hint, icon: Icon }: StatCardProps) {
             <p className="mt-3 text-3xl font-semibold tracking-tight text-foreground">
               {value}
             </p>
-            <p className="mt-2 text-sm text-muted-foreground">{hint}</p>
+            {hint ? (
+              <p className="mt-2 text-sm text-muted-foreground">{hint}</p>
+            ) : null}
           </div>
           <div className="rounded-2xl bg-primary/10 p-3 text-primary">
             <Icon className="h-5 w-5" />

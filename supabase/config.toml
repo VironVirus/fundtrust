@@ -1,0 +1,4 @@
+project_id = "fundtrust"
+
+[functions.process-notification-events]
+verify_jwt = false

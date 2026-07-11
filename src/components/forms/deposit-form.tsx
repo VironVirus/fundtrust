@@ -209,7 +209,7 @@ export function DepositForm({ customers }: DepositFormProps) {
       <FormMessage state={state} />
 
       <SubmitButton pendingLabel="Recording deposit..." className="w-full">
-        Record deposit and notify customer
+        Record deposit
       </SubmitButton>
     </form>
   );

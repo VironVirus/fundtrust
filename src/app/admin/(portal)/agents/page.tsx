@@ -1,3 +1,4 @@
+import { AdminCreateAgentForm } from "@/components/forms/admin-create-agent-form";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -43,13 +44,21 @@ export default async function AgentsPage() {
           Marketers
         </p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground">
-          Review every registered field marketer
+          Marketers
         </h1>
         <p className="mt-2 text-sm leading-7 text-muted-foreground">
-          Track registration status, total collection value, and last activity
-          from one central table.
+          Create marketer accounts here and review their activity.
         </p>
       </section>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Create marketer</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <AdminCreateAgentForm />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

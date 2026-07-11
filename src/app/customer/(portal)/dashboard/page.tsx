@@ -12,7 +12,6 @@ import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -43,7 +42,7 @@ export default async function CustomerDashboardPage() {
       <main className="space-y-6">
         <EmptyState
           title="Customer profile not found"
-          description="We could not find the customer record tied to this session. Please sign in again or contact support."
+          description="Please sign in again."
           icon={UserSquare2}
         />
       </main>
@@ -58,15 +57,12 @@ export default async function CustomerDashboardPage() {
     <main className="space-y-6">
       <section className="rounded-[2rem] border border-border/70 bg-white/86 p-6 shadow-xl shadow-slate-950/5">
         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">
-          Customer dashboard
+          Customer
         </p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground">
-          Hello, {customer.name}
+          {customer.name}
         </h1>
-        <p className="mt-2 text-sm leading-7 text-muted-foreground">
-          Review your customer ID, total saved so far, and recent contribution
-          activity.
-        </p>
+        <p className="mt-2 text-sm leading-7 text-muted-foreground">View your profile and deposits.</p>
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <Badge variant="success">Customer ID {customer.id}</Badge>
           <Badge
@@ -85,13 +81,12 @@ export default async function CustomerDashboardPage() {
         <StatCard
           title="Total saved"
           value={formatCurrency(customer.totalAmount)}
-          hint="Total amount recorded so far"
+          hint="Saved so far"
           icon={ReceiptText}
         />
         <StatCard
           title="Deposits"
           value={transactions.length.toLocaleString("en-NG")}
-          hint="All recorded contribution entries"
           icon={UserSquare2}
         />
         <StatCard
@@ -109,7 +104,7 @@ export default async function CustomerDashboardPage() {
         <StatCard
           title="Customer ID"
           value={customer.id}
-          hint="Share this when a marketer records deposits"
+          hint="Use this for deposits"
           icon={Hash}
         />
         <StatCard
@@ -124,9 +119,6 @@ export default async function CustomerDashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Profile details</CardTitle>
-            <CardDescription>
-              These details are pulled from your customer sheet record.
-            </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 text-sm">
             <div className="rounded-[1.5rem] bg-slate-50 p-4">
@@ -170,10 +162,6 @@ export default async function CustomerDashboardPage() {
               <p className="mt-2 text-foreground">
                 Total saved: {formatCurrency(customer.totalAmount)}
               </p>
-              <p className="text-muted-foreground">
-                Customers can keep contributing at any time without a fixed
-                target limit.
-              </p>
             </div>
           </CardContent>
         </Card>
@@ -181,9 +169,6 @@ export default async function CustomerDashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Recent contribution history</CardTitle>
-            <CardDescription>
-              Your latest deposits as recorded by Fundtrust marketers.
-            </CardDescription>
           </CardHeader>
           <CardContent>
             {transactions.length > 0 ? (
@@ -212,7 +197,7 @@ export default async function CustomerDashboardPage() {
             ) : (
               <EmptyState
                 title="No deposits yet"
-                description="Once a contribution has been recorded for your profile, it will appear here."
+                description="No deposits recorded yet."
                 icon={ReceiptText}
               />
             )}

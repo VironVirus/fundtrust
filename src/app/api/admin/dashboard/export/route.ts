@@ -12,7 +12,7 @@ export async function GET(request: Request) {
   const session = await getSession();
 
   if (!session || session.role !== "admin") {
-    return NextResponse.redirect(new URL("/admin/login", request.url));
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   const [{ overview }, customers, transactions] = await Promise.all([

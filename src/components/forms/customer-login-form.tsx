@@ -99,13 +99,13 @@ export function CustomerLoginForm() {
       <FormMessage state={state} />
 
       <SubmitButton pendingLabel="Signing in..." className="w-full">
-        Sign in to customer portal
+        Sign in
       </SubmitButton>
 
       <p className="text-sm text-muted-foreground">
         New customer?{" "}
-        <Link href="/customer/register" className="font-semibold text-primary">
-          Submit your details
+        <Link href="/register" className="font-semibold text-primary">
+          Create account
         </Link>
       </p>
     </form>

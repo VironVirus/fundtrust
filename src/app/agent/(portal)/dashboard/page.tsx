@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -40,15 +39,12 @@ export default async function AgentDashboardPage() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">
-              Marketer dashboard
+              Marketer
             </p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground">
-              Welcome back, {session.name}
+              {session.name}
             </h1>
-            <p className="mt-2 text-sm leading-7 text-muted-foreground">
-              Record today’s collections, track your totals, and print a clean
-              end-of-day report.
-            </p>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">Record deposits and view reports.</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Button asChild variant="outline">
@@ -68,25 +64,25 @@ export default async function AgentDashboardPage() {
         <StatCard
           title="Today"
           value={formatCurrency(stats.todayCollections)}
-          hint="Collected so far today"
+          hint="Today's total"
           icon={Wallet}
         />
         <StatCard
           title="Total handled"
           value={formatCurrency(stats.totalCollected)}
-          hint="All-time value for this marketer"
+          hint="All time"
           icon={ReceiptText}
         />
         <StatCard
           title="Transactions"
           value={stats.totalTransactions.toLocaleString("en-NG")}
-          hint="Deposits recorded by this account"
+          hint="Recorded deposits"
           icon={ScrollText}
         />
         <StatCard
           title="Customers served"
           value={stats.customersServed.toLocaleString("en-NG")}
-          hint="Unique customers reached"
+          hint="Unique customers"
           icon={UserCircle2}
         />
       </section>
@@ -95,11 +91,7 @@ export default async function AgentDashboardPage() {
         <Card className="border-white/70 bg-white/90">
           <CardHeader>
             <CardTitle>Record a deposit</CardTitle>
-            <CardDescription>
-              Search an existing customer, enter the amount, choose cash or
-              transfer, and submit. The customer balance and transaction sheet
-              will update automatically.
-            </CardDescription>
+            <p className="text-sm text-muted-foreground">Select customer, amount, and payment method.</p>
           </CardHeader>
           <CardContent>
             {customers.length > 0 ? (
@@ -107,7 +99,7 @@ export default async function AgentDashboardPage() {
             ) : (
               <EmptyState
                 title="No customers available"
-                description="Add customers to the Google Sheet before marketers start recording deposits."
+                description="Add customers first."
                 icon={UserCircle2}
               />
             )}
@@ -117,10 +109,7 @@ export default async function AgentDashboardPage() {
         <Card className="border-white/70 bg-white/90">
           <CardHeader>
             <CardTitle>Recent transactions</CardTitle>
-            <CardDescription>
-              Your latest deposit activity appears here in reverse chronological
-              order.
-            </CardDescription>
+            <p className="text-sm text-muted-foreground">Latest activity.</p>
           </CardHeader>
           <CardContent>
             {recentTransactions.length > 0 ? (
@@ -151,7 +140,7 @@ export default async function AgentDashboardPage() {
             ) : (
               <EmptyState
                 title="No transactions yet"
-                description="As soon as this marketer records a deposit, the transaction log will appear here."
+                description="No deposits recorded yet."
                 icon={ReceiptText}
               />
             )}

@@ -68,6 +68,11 @@ export const agentLoginSchema = z.object({
   password: z.string().min(1, "Enter your password."),
 });
 
+export const sharedLoginSchema = z.object({
+  identifier: z.string().min(3, "Enter your login details."),
+  password: z.string().min(1, "Enter your password."),
+});
+
 export const adminLoginSchema = z.object({
   login: z.string().min(1, "Enter your admin login."),
   password: z.string().min(1, "Enter your password."),
@@ -119,8 +124,32 @@ export const customerRegistrationSchema = addSavingsValidation(
     balanceToComplete: amountSchema,
     totalAmount: amountSchema,
     dateJoined: z.string().min(1, "Enter the joining date."),
+    password: z.string().min(8, "Password must be at least 8 characters."),
+    confirmPassword: z.string().min(8, "Confirm the password."),
   }),
-);
+).refine((values) => values.password === values.confirmPassword, {
+  message: "Passwords do not match.",
+  path: ["confirmPassword"],
+});
+
+export const adminCreationSchema = z
+  .object({
+    name: z.string().min(3, "Enter the administrator's full name."),
+    login: z
+      .string()
+      .min(3, "Enter an admin login.")
+      .regex(
+        /^[a-zA-Z0-9._-]+$/,
+        "Use only letters, numbers, dots, hyphens, or underscores.",
+      ),
+    email: z.string().email("Enter a valid email address."),
+    password: z.string().min(8, "Password must be at least 8 characters."),
+    confirmPassword: z.string().min(8, "Confirm the password."),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
 
 export const customerUpdateSchema = addSavingsValidation(
   z.object({

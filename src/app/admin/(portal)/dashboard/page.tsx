@@ -13,7 +13,6 @@ import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -39,15 +38,12 @@ export default async function AdminDashboardPage() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-primary">
-              Admin dashboard
+              Admin
             </p>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground">
-              Fundtrust control center
+              Dashboard
             </h1>
-            <p className="mt-2 text-sm leading-7 text-muted-foreground">
-              Review collections, customers, marketers, and transaction activity
-              across the full savings operation.
-            </p>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">View customers, marketers, and transactions.</p>
           </div>
           <div className="flex flex-wrap gap-3">
             <Button asChild variant="outline">
@@ -73,37 +69,37 @@ export default async function AdminDashboardPage() {
         <StatCard
           title="Customers"
           value={overview.totalCustomers.toLocaleString("en-NG")}
-          hint="Registered savers"
+          hint="Registered customers"
           icon={Users}
         />
         <StatCard
           title="Marketers"
           value={overview.totalMarketers.toLocaleString("en-NG")}
-          hint={`${overview.activeMarketers.toLocaleString("en-NG")} active field staff`}
+          hint={`${overview.activeMarketers.toLocaleString("en-NG")} active`}
           icon={Building2}
         />
         <StatCard
           title="Deposited today"
           value={formatCurrency(overview.amountDepositedToday)}
-          hint="Amount collected today"
+          hint="Today"
           icon={CircleDollarSign}
         />
         <StatCard
           title="Total deposits"
           value={formatCurrency(overview.totalDeposits)}
-          hint="All recorded contributions"
+          hint="All deposits"
           icon={CircleDollarSign}
         />
         <StatCard
           title="Customers funded"
           value={overview.customersWithDeposits.toLocaleString("en-NG")}
-          hint="Customers with at least one deposit"
+          hint="With deposits"
           icon={Users}
         />
         <StatCard
           title="This month"
           value={formatCurrency(overview.monthlyCollections)}
-          hint="Collections recorded this month"
+          hint="Monthly total"
           icon={PiggyBank}
         />
       </section>
@@ -112,9 +108,6 @@ export default async function AdminDashboardPage() {
         <Card>
           <CardHeader>
             <CardTitle>Recent transactions</CardTitle>
-            <CardDescription>
-              Latest collection activity across all marketers.
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
@@ -178,9 +171,6 @@ export default async function AdminDashboardPage() {
       <Card>
         <CardHeader>
           <CardTitle>Customer activity watch</CardTitle>
-          <CardDescription>
-            Customers with the highest total contributions so far.
-          </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>

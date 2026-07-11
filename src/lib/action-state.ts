@@ -41,10 +41,12 @@ export function errorState(
 export function successState(
   message: string,
   fields?: Record<string, string>,
+  redirectTo?: string,
 ): FormActionState {
   return {
     status: "success",
     message,
     fields,
+    redirectTo,
   };
 }

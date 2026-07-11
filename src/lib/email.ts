@@ -1,20 +1,20 @@
 import "server-only";
 
-import nodemailer from "nodemailer";
-import { Resend } from "resend";
-
 import { getEnv } from "@/lib/env";
 import { formatCurrency, formatDateTime } from "@/lib/format";
+import { queueNotificationEvent } from "@/lib/supabase";
 import {
   formatTransactionType,
   type TransactionPaymentMethod,
 } from "@/lib/transaction-options";
 
 type EmailPayload = {
+  eventType: string;
   to: string;
   subject: string;
   text: string;
   html: string;
+  payload?: Record<string, unknown>;
 };
 
 type DepositEmailInput = {
@@ -37,91 +37,22 @@ type WelcomeEmailInput = {
 
 export type EmailDeliveryResult = {
   delivered: boolean;
-  provider: "smtp" | "resend" | "log";
+  provider: "supabase" | "log";
 };
 
-let cachedTransporter: nodemailer.Transporter | null = null;
-
-function getSmtpTransporter() {
-  if (cachedTransporter) {
-    return cachedTransporter;
-  }
-
-  const env = getEnv();
-  cachedTransporter = nodemailer.createTransport({
-    host: env.SMTP_HOST,
-    port: env.SMTP_PORT,
-    secure: env.SMTP_SECURE,
-    auth:
-      env.SMTP_USER && env.SMTP_PASS
-        ? {
-            user: env.SMTP_USER,
-            pass: env.SMTP_PASS,
-          }
-        : undefined,
+async function sendEmail(payload: EmailPayload): Promise<EmailDeliveryResult> {
+  const queued = await queueNotificationEvent({
+    eventType: payload.eventType,
+    toEmail: payload.to,
+    subject: payload.subject,
+    textBody: payload.text,
+    htmlBody: payload.html,
+    payload: payload.payload,
   });
 
-  return cachedTransporter;
-}
-
-function normalizeEmailError(error: unknown) {
-  if (!(error instanceof Error)) {
-    return new Error("Email delivery failed.");
-  }
-
-  if ("code" in error && error.code === "EAUTH") {
-    return new Error(
-      "SMTP authentication failed. If you are using Gmail, create a Google App Password and use that as SMTP_PASS.",
-    );
-  }
-
-  return error;
-}
-
-async function sendEmail(payload: EmailPayload): Promise<EmailDeliveryResult> {
-  const env = getEnv();
-
-  if (env.EMAIL_PROVIDER === "smtp") {
-    try {
-      await getSmtpTransporter().sendMail({
-        from: env.SMTP_FROM,
-        to: payload.to,
-        subject: payload.subject,
-        text: payload.text,
-        html: payload.html,
-      });
-    } catch (error) {
-      throw normalizeEmailError(error);
-    }
-
-    return {
-      delivered: true,
-      provider: "smtp",
-    };
-  }
-
-  if (env.EMAIL_PROVIDER === "resend") {
-    const resend = new Resend(env.RESEND_API_KEY);
-
-    await resend.emails.send({
-      from: env.RESEND_FROM!,
-      to: payload.to,
-      subject: payload.subject,
-      text: payload.text,
-      html: payload.html,
-    });
-
-    return {
-      delivered: true,
-      provider: "resend",
-    };
-  }
-
-  console.info("Fundtrust email preview", payload);
-
   return {
-    delivered: false,
-    provider: "log",
+    delivered: queued,
+    provider: queued ? "supabase" : "log",
   };
 }
 
@@ -168,10 +99,12 @@ Thank you for saving with Fundtrust.`;
   `;
 
   return sendEmail({
+    eventType: "deposit_receipt",
     to: input.customerEmail,
     subject,
     text,
     html,
+    payload: input,
   });
 }
 
@@ -220,10 +153,12 @@ Thank you for choosing Fundtrust.`;
   `;
 
   return sendEmail({
+    eventType: "customer_welcome",
     to: input.customerEmail,
     subject,
     text,
     html,
+    payload: input,
   });
 }
 
@@ -254,9 +189,11 @@ ${input.message}`;
   `;
 
   return sendEmail({
+    eventType: "contact_message",
     to: getEnv().ADMIN_EMAIL,
     subject,
     text,
     html,
+    payload: input,
   });
 }

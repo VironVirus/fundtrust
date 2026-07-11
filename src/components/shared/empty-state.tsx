@@ -2,7 +2,7 @@ import type { LucideIcon } from "lucide-react";
 
 type EmptyStateProps = {
   title: string;
-  description: string;
+  description?: string;
   icon: LucideIcon;
 };
 
@@ -17,9 +17,11 @@ export function EmptyState({
         <Icon className="h-6 w-6" />
       </div>
       <h3 className="mt-5 text-lg font-semibold text-foreground">{title}</h3>
-      <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-muted-foreground">
-        {description}
-      </p>
+      {description ? (
+        <p className="mx-auto mt-2 max-w-md text-sm leading-7 text-muted-foreground">
+          {description}
+        </p>
+      ) : null}
     </div>
   );
 }

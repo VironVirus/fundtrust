@@ -3,11 +3,9 @@ import Link from "next/link";
 const footerLinks = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
-  { href: "/how-it-works", label: "How it Works" },
   { href: "/contact", label: "Contact" },
-  { href: "/customer/login", label: "Customer Login" },
-  { href: "/agent/login", label: "Marketer Login" },
-  { href: "/admin/login", label: "Admin Login" },
+  { href: "/register", label: "Create account" },
+  { href: "/login", label: "Login" },
 ];
 
 export function MarketingFooter() {
@@ -18,13 +16,8 @@ export function MarketingFooter() {
           <p className="text-sm font-semibold uppercase tracking-[0.25em] text-emerald-300">
             Fundtrust
           </p>
-          <h2 className="mt-3 font-display text-3xl">
-            A trustworthy operating system for daily contribution teams.
-          </h2>
-          <p className="mt-4 text-sm leading-7 text-slate-300">
-            Built for agencies, collectors, marketers, and administrators who
-            need clear reporting, accountable collection flows, and better
-            customer trust.
+          <p className="mt-3 text-sm leading-7 text-slate-300">
+            Daily savings management with customer self-service and admin-controlled staff access.
           </p>
         </div>
 

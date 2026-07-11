@@ -65,10 +65,7 @@ export default async function AgentReportPage({
             <h1 className="mt-3 text-3xl font-semibold tracking-tight text-foreground">
               {reportFileName}
             </h1>
-            <p className="mt-2 text-sm leading-7 text-muted-foreground">
-              Print this page directly or export the same report layout as a CSV
-              file.
-            </p>
+            <p className="mt-2 text-sm leading-7 text-muted-foreground">Print or export this report.</p>
           </div>
           <div className="flex flex-wrap gap-3 print:hidden">
             <Button asChild variant="outline">
@@ -171,7 +168,7 @@ export default async function AgentReportPage({
           ) : (
             <EmptyState
               title="No collections found"
-              description="There were no deposits recorded for this date."
+              description="No deposits for this date."
               icon={ReceiptText}
             />
           )}

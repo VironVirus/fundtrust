@@ -36,6 +36,7 @@ const navByRole = {
     { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/customers", label: "Customers", icon: Users },
     { href: "/admin/agents", label: "Marketers", icon: Building2 },
+    { href: "/admin/admins", label: "Admins", icon: ShieldCheck },
     { href: "/admin/transactions", label: "Transactions", icon: Coins },
   ],
 } satisfies Record<

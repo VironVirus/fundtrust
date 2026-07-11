@@ -17,5 +17,5 @@ export default async function AdminIndexPage() {
     redirect("/customer/dashboard");
   }
 
-  redirect("/admin/login");
+  redirect("/login");
 }

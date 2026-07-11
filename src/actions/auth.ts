@@ -10,27 +10,31 @@ import {
   successState,
   validationErrorState,
 } from "@/lib/action-state";
-import { clearSession, createSession } from "@/lib/auth";
+import { clearSession, createSession, requireAdminSession } from "@/lib/auth";
 import { sendCustomerWelcomeEmail } from "@/lib/email";
 import { getEnv } from "@/lib/env";
-import { logWhatsAppDiagnostic } from "@/lib/whatsapp-diagnostics";
 import {
+  createAdmin,
   createAgent,
   createCustomer,
+  getAdminByLogin,
   getAgentByPhone,
+  getCustomerByIdentifier,
   getCustomerByPhoneAndEmail,
-  isAppsScriptConfigured,
+  isSupabaseConfigured,
 } from "@/lib/sheets";
-import type { FormActionState } from "@/lib/types";
+import type { FormActionState, SessionUser } from "@/lib/types";
 import {
+  adminCreationSchema,
   adminLoginSchema,
   agentLoginSchema,
   agentRegistrationSchema,
   customerLoginSchema,
   customerRegistrationSchema,
+  sharedLoginSchema,
 } from "@/lib/validators";
-import { sendCustomerRegistrationWhatsApp } from "@/lib/whatsapp";
 
+const sharedLoginFields = ["identifier", "password"];
 const agentLoginFields = ["phone", "password"];
 const agentRegistrationFields = [
   "name",
@@ -42,6 +46,13 @@ const agentRegistrationFields = [
   "confirmPassword",
 ];
 const adminLoginFields = ["login", "password"];
+const adminCreationFields = [
+  "name",
+  "login",
+  "email",
+  "password",
+  "confirmPassword",
+];
 const customerPortalFields = [
   "phone",
   "email",
@@ -63,12 +74,192 @@ const customerRegistrationFields = [
   "balanceToComplete",
   "totalAmount",
   "dateJoined",
+  "password",
+  "confirmPassword",
 ];
+
+function normalizeText(value: string) {
+  return value.trim();
+}
+
+function normalizePhone(value: string) {
+  return normalizeText(value).replace(/\s+/g, "");
+}
+
+function getRedirectPath(role: "admin" | "agent" | "customer") {
+  if (role === "admin") {
+    return "/admin/dashboard";
+  }
+
+  if (role === "agent") {
+    return "/agent/dashboard";
+  }
+
+  return "/customer/dashboard";
+}
+
+async function authenticateWithSharedLogin(
+  identifier: string,
+  password: string,
+) {
+  const env = getEnv();
+  const normalizedIdentifier = normalizeText(identifier);
+  const normalizedIdentifierLower = normalizedIdentifier.toLowerCase();
+  const normalizedPhone = normalizePhone(identifier);
+  const candidates: Array<{
+    session: SessionUser;
+    passwordHash: string;
+    status: string;
+    missingPasswordMessage?: string;
+  }> = [];
+
+  if (normalizedIdentifierLower === env.ADMIN_LOGIN.trim().toLowerCase()) {
+    candidates.push({
+      session: {
+        role: "admin",
+        userId: "bootstrap-admin",
+        name: "Fundtrust Admin",
+        email: env.ADMIN_EMAIL,
+      },
+      passwordHash: env.ADMIN_PASSWORD_HASH,
+      status: "Active",
+    });
+  }
+
+  if (isSupabaseConfigured()) {
+    const [admin, agent, customer] = await Promise.all([
+      getAdminByLogin(normalizedIdentifier),
+      getAgentByPhone(normalizedPhone),
+      getCustomerByIdentifier(normalizedIdentifier),
+    ]);
+
+    if (admin) {
+      candidates.push({
+        session: {
+          role: "admin",
+          userId: admin.id,
+          name: admin.name,
+          email: admin.email,
+        },
+        passwordHash: admin.passwordHash,
+        status: admin.status,
+      });
+    }
+
+    if (agent) {
+      candidates.push({
+        session: {
+          role: "agent",
+          userId: agent.id,
+          name: agent.name,
+          phone: agent.phone,
+          branch: agent.branch,
+        },
+        passwordHash: agent.passwordHash,
+        status: agent.status,
+      });
+    }
+
+    if (customer) {
+      candidates.push({
+        session: {
+          role: "customer",
+          userId: customer.id,
+          name: customer.name,
+          phone: customer.phone,
+          email: customer.email,
+          branch: customer.branch,
+        },
+        passwordHash: customer.passwordHash,
+        status: customer.status,
+        missingPasswordMessage:
+          "This customer account needs a password before it can sign in. Please contact an administrator.",
+      });
+    }
+  } else if (candidates.length === 0) {
+    throw new Error(
+      "Supabase is not configured yet. Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to your environment.",
+    );
+  }
+
+  let sawInactiveAccount = false;
+  let missingPasswordMessage: string | null = null;
+
+  for (const candidate of candidates) {
+    if (candidate.status.toLowerCase() !== "active") {
+      sawInactiveAccount = true;
+      continue;
+    }
+
+    if (!candidate.passwordHash) {
+      missingPasswordMessage ??= candidate.missingPasswordMessage || null;
+      continue;
+    }
+
+    const passwordMatches = await compare(password, candidate.passwordHash);
+
+    if (!passwordMatches) {
+      continue;
+    }
+
+    return {
+      role: candidate.session.role,
+      redirectTo: getRedirectPath(candidate.session.role),
+      session: candidate.session,
+    };
+  }
+
+  if (missingPasswordMessage) {
+    throw new Error(missingPasswordMessage);
+  }
+
+  if (sawInactiveAccount) {
+    throw new Error(
+      "This account is not active. Please contact an administrator.",
+    );
+  }
+
+  throw new Error("Invalid login credentials.");
+}
+
+export async function loginAction(
+  _previousState: FormActionState,
+  formData: FormData,
+): Promise<FormActionState> {
+  const fields = collectFields(formData, sharedLoginFields);
+  const parsed = sharedLoginSchema.safeParse(fields);
+
+  if (!parsed.success) {
+    return validationErrorState(parsed.error, fields);
+  }
+
+  try {
+    const result = await authenticateWithSharedLogin(
+      parsed.data.identifier,
+      parsed.data.password,
+    );
+
+    await createSession(result.session);
+
+    return successState(
+      `Welcome back, ${result.session.name}.`,
+      fields,
+      result.redirectTo,
+    );
+  } catch (error) {
+    return errorState(
+      error instanceof Error ? error.message : "Login could not be completed.",
+      fields,
+    );
+  }
+}
 
 export async function registerAgentAction(
   _previousState: FormActionState,
   formData: FormData,
 ): Promise<FormActionState> {
+  await requireAdminSession();
+
   const fields = collectFields(formData, agentRegistrationFields);
   const parsed = agentRegistrationSchema.safeParse(fields);
 
@@ -76,9 +267,9 @@ export async function registerAgentAction(
     return validationErrorState(parsed.error, fields);
   }
 
-  if (!isAppsScriptConfigured()) {
+  if (!isSupabaseConfigured()) {
     return errorState(
-      "Apps Script backend is not configured yet. Add APPS_SCRIPT_WEB_APP_URL to .env.local.",
+      "Supabase is not configured yet. Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to your environment.",
       fields,
     );
   }
@@ -108,13 +299,78 @@ export async function registerAgentAction(
     revalidatePath("/admin/agents");
 
     return successState(
-      "Registration successful. The new marketer can now sign in.",
+      "Marketer account created. The marketer can now sign in.",
     );
   } catch (error) {
     return errorState(
       error instanceof Error
         ? error.message
-        : "Marketer registration could not be completed.",
+        : "Marketer account could not be created.",
+      fields,
+    );
+  }
+}
+
+export async function createAdminAction(
+  _previousState: FormActionState,
+  formData: FormData,
+): Promise<FormActionState> {
+  await requireAdminSession();
+
+  const fields = collectFields(formData, adminCreationFields);
+  const parsed = adminCreationSchema.safeParse(fields);
+
+  if (!parsed.success) {
+    return validationErrorState(parsed.error, fields);
+  }
+
+  if (!isSupabaseConfigured()) {
+    return errorState(
+      "Supabase is not configured yet. Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to your environment.",
+      fields,
+    );
+  }
+
+  try {
+    const env = getEnv();
+    const requestedLogin = parsed.data.login.trim().toLowerCase();
+
+    if (requestedLogin === env.ADMIN_LOGIN.trim().toLowerCase()) {
+      return errorState(
+        "That login is already reserved for the primary admin account.",
+        fields,
+      );
+    }
+
+    const existingAdmin = await getAdminByLogin(requestedLogin);
+
+    if (existingAdmin) {
+      return errorState(
+        "An administrator with that login already exists.",
+        fields,
+      );
+    }
+
+    const passwordHash = await hash(parsed.data.password, 10);
+
+    await createAdmin({
+      name: parsed.data.name,
+      login: requestedLogin,
+      email: parsed.data.email,
+      passwordHash,
+      status: "Active",
+    });
+
+    revalidatePath("/admin/admins");
+
+    return successState(
+      "Administrator account created. The new admin can now sign in.",
+    );
+  } catch (error) {
+    return errorState(
+      error instanceof Error
+        ? error.message
+        : "Administrator account could not be created.",
       fields,
     );
   }
@@ -131,9 +387,9 @@ export async function agentLoginAction(
     return validationErrorState(parsed.error, fields);
   }
 
-  if (!isAppsScriptConfigured()) {
+  if (!isSupabaseConfigured()) {
     return errorState(
-      "Apps Script backend is not configured yet. Add APPS_SCRIPT_WEB_APP_URL to .env.local.",
+      "Supabase is not configured yet. Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to your environment.",
       fields,
     );
   }
@@ -222,19 +478,28 @@ export async function registerCustomerAction(
     return validationErrorState(parsed.error, fields);
   }
 
-  if (!isAppsScriptConfigured()) {
+  if (!isSupabaseConfigured()) {
     return errorState(
-      "Apps Script backend is not configured yet. Add APPS_SCRIPT_WEB_APP_URL to .env.local.",
+      "Supabase is not configured yet. Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to your environment.",
       fields,
     );
   }
 
   try {
-    const customer = await createCustomer(parsed.data);
+    const {
+      confirmPassword: _confirmPassword,
+      password,
+      ...customerInput
+    } = parsed.data;
+    const passwordHash = await hash(password, 10);
+    const customer = await createCustomer({
+      ...customerInput,
+      passwordHash,
+    });
 
     revalidatePath("/admin/customers");
 
-    let message = `Customer profile submitted successfully. Your customer ID is ${customer.id}. You can now sign in with your phone number, email, branch, and plan type.`;
+    let message = `Customer created. ID: ${customer.id}.`;
 
     if (customer.email) {
       const emailPayload = {
@@ -246,36 +511,16 @@ export async function registerCustomerAction(
         dateJoined: customer.dateJoined,
       };
 
-      setTimeout(() => {
-        void sendCustomerWelcomeEmail(emailPayload).catch((error) => {
-          console.error("Fundtrust welcome email failed", error);
-        });
-      }, 0);
-    }
-
-    if (customer.phone) {
-      const whatsappPayload = {
-        customerName: customer.name,
-        customerId: customer.id,
-        phone: customer.phone,
-        branch: customer.branch || "Not set",
-        contributionType: customer.contributionType || "Not set",
-      };
-
       try {
-        await sendCustomerRegistrationWhatsApp(whatsappPayload);
+        await sendCustomerWelcomeEmail(emailPayload);
+        message += " Welcome email queued.";
       } catch (error) {
-        console.error("Fundtrust registration WhatsApp failed", error);
-        await logWhatsAppDiagnostic("registration", whatsappPayload, error);
-        message += " WhatsApp alert could not be sent right now.";
-
-        if (process.env.NODE_ENV !== "production" && error instanceof Error) {
-          message += ` Detail: ${error.message}`;
-        }
+        console.error("Fundtrust welcome email failed", error);
+        message += " Welcome email could not be queued.";
       }
     }
 
-    return successState(message);
+    return successState(message, undefined, "/login");
   } catch (error) {
     return errorState(
       error instanceof Error
@@ -297,9 +542,9 @@ export async function customerLoginAction(
     return validationErrorState(parsed.error, fields);
   }
 
-  if (!isAppsScriptConfigured()) {
+  if (!isSupabaseConfigured()) {
     return errorState(
-      "Apps Script backend is not configured yet. Add APPS_SCRIPT_WEB_APP_URL to .env.local.",
+      "Supabase is not configured yet. Add SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY to your environment.",
       fields,
     );
   }
@@ -314,7 +559,7 @@ export async function customerLoginAction(
 
     if (!customer) {
       return errorState(
-        "No customer record matched that phone number, email, branch, and plan combination.",
+        "No customer matched those details.",
         fields,
       );
     }
